@@ -1,11 +1,10 @@
 package de.lubowiecki;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +37,12 @@ public class MainController {
     @FXML
     DatePicker geburtsDatum;
 
+    @FXML
+    Label errorOutput;
+
+    @FXML
+    ListView<Person> customerList;
+
     private StringBuilder content = new StringBuilder();
 
     private List<Person> persons = new ArrayList<>();
@@ -59,17 +64,50 @@ public class MainController {
         content = new StringBuilder();
 //        content.setLength(0);
 //        content.trimToSize();
-        System.out.println(content.length());
-        System.out.println(content.capacity());
+//        System.out.println(content.length());
+//        System.out.println(content.capacity());
         txtOutput.setText(content.toString());
     }
 
     public void savePerson() {
+
+        if(!validateForm()) {
+            return; // Wenn Error, dann die Methode verlassen
+        }
+
         Person p = new Person(vorname.getText(), nachname.getText(), geburtsDatum.getValue());
         persons.add(p); // Person ion der Liste ablegen
-        txtOutput.setText(persons.toString());
+        //txtOutput.setText(persons.toString()); // Ausgabe in das TextArea
 
-        // Als String
-        //txtOutput.setText(vorname.getText() + ", " + nachname.getText() + ", " + geburtsDatum.getValue());
+        // Normale ArrayList muss für die ListView in eine ObservableList konvertiert werden
+        customerList.setItems(FXCollections.observableList(persons)); // Inhalt von persons in die ListView ausgeben
+
+        clearForm();
     }
+
+    private boolean validateForm() {
+        final StringBuilder errors = new StringBuilder();
+
+        if(vorname.getText().isEmpty() || vorname.getText().length() < 2) {
+            errors.append("Vorname ist nicht gültig!\n");
+        }
+        if(nachname.getText().isEmpty() || nachname.getText().length() < 2) {
+            errors.append("Nachname ist nicht gültig!\n");
+        }
+
+        if(geburtsDatum.getValue() == null || !geburtsDatum.getValue().isBefore(LocalDate.now())) { // Überprüfen
+            errors.append("Datum ist nicht gültig!\n");
+        }
+
+        errorOutput.setText(errors.toString());
+        return errors.length() == 0;
+    }
+
+    private void clearForm() {
+        vorname.clear();
+        nachname.clear();
+        geburtsDatum.setValue(LocalDate.now());
+        geburtsDatum.getEditor().clear();
+    }
+
 }
