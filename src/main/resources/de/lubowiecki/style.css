@@ -1,0 +1,31 @@
+@font-face {
+    font-family: "Chewy Regular";
+    font-style: normal;
+    font-weight: 400;
+    src: url("Chewy-Regular.ttf");
+}
+
+
+FlowPane {
+    -fx-background-color: #ffff00;
+}
+
+Button {
+    -fx-background-color: #00ffff;
+    -fx-font-size: 12px;
+    -fx-font-family: "Chewy Regular";
+}
+
+Button:hover {
+    -fx-background-color: #0088ff;
+}
+
+.btn-switch {
+    -fx-background-color: #ff9900;
+    -fx-font-size: 12px;
+    -fx-background-radius: 5em;
+}
+
+.btn-switch:hover {
+    -fx-background-color: #ff0000;
+}

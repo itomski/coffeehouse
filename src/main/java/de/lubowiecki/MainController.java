@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -110,4 +111,9 @@ public class MainController {
         geburtsDatum.getEditor().clear();
     }
 
+    public void switchToEinkaufsliste() throws IOException {
+        App.setRoot("einkaufsliste-view");
+        App.mainStage.setWidth(300);
+        App.mainStage.setHeight(660);
+    }
 }

@@ -18,17 +18,15 @@ public class App extends Application {
 
     private static Scene scene;
 
+    static Stage mainStage;
+
     @Override
     public void start(Stage stage) throws IOException {
 
+        mainStage = stage;
+
         // Die Struktur der GUI-Objekte wird aus dem FXML geladen
         scene = new Scene(loadFXML("main-view"));
-
-//        Button btn = new Button("Click");
-//        Label txt = new Label("Das ist mein Text");
-//        VBox box = new VBox(btn, txt);
-//        scene = new Scene(box);
-
         stage.setScene(scene);
         stage.show();
     }
