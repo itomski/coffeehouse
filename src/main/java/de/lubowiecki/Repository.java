@@ -1,9 +1,6 @@
 package de.lubowiecki;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 
 public interface Repository<T> {

@@ -1,11 +1,9 @@
 package de.lubowiecki;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class TaskRepository implements Repository<Task> {
 
@@ -25,23 +23,29 @@ public class TaskRepository implements Repository<Task> {
 
     @Override
     public List<Task> findAll() throws SQLException {
-
-        try(Connection conn = DbUtils.getConnection(); Statement stmt = conn.createStatement()) {
-            final String SQL = "SELECT * FROM " + TABLE;
-            stmt.execute(SQL);
-            ResultSet results = stmt.getResultSet();
-            List<Task> tasks = new ArrayList<>();
-            while(results.next()) {
-                // Tasks erzeugen und in der Liste ablegen
-                tasks.add(populate(results));
-            }
-            return tasks;
-        }
+        return find("SELECT * FROM " + TABLE);
     }
 
     @Override
     public Task findById(int id) throws SQLException {
-        return null;
+        try {
+            return find("SELECT * FROM " + TABLE + " WHERE id = " + id).getFirst();
+        }
+        catch(NoSuchElementException e) {
+            return null;
+        }
+    }
+
+    private List<Task> find(final String SQL) throws SQLException {
+        try(Connection conn = DbUtils.getConnection(); Statement stmt = conn.createStatement()) {
+            stmt.execute(SQL);
+            ResultSet results = stmt.getResultSet();
+            List<Task> tasks = new ArrayList<>();
+            while(results.next()) {
+                tasks.add(populate(results));
+            }
+            return tasks;
+        }
     }
 
     @Override
@@ -57,17 +61,31 @@ public class TaskRepository implements Repository<Task> {
 
     @Override
     public boolean save(Task task) throws SQLException {
-        return false;
+        if(task.getId() > 0) {
+            return update(task);
+        }
+        return insert(task);
     }
 
     @Override
     public boolean insert(Task task) throws SQLException {
-        return false;
+        final String SQL = "INSERT INTO " + TABLE + " (id, name, open) VALUES(null, ?, ?)";
+        return executePreparedSql(SQL, task) > 0;
     }
 
     @Override
     public boolean update(Task task) throws SQLException {
-        return false;
+        final String SQL = "UPDATE " + TABLE + " SET name = ?, open = ? WHERE id = " + task.getId();
+        return executePreparedSql(SQL, task) > 0;
+    }
+
+    private int executePreparedSql(final String SQL, Task task) throws SQLException {
+        try(Connection conn = DbUtils.getConnection(); PreparedStatement stmt = conn.prepareStatement(SQL)) {
+            stmt.setString(1, task.getName());
+            stmt.setBoolean(2, task.isOpen());
+            stmt.execute();
+            return stmt.getUpdateCount();
+        }
     }
 
     @Override
