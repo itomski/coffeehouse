@@ -33,7 +33,7 @@ public class EinkaufslisteController implements Initializable {
     @FXML
     ListView<Task> taskList;
 
-    private List<Task> alleTasks = new ArrayList<>();
+    //private List<Task> alleTasks = new ArrayList<>();
 
     private Predicate<Task> filter;
 
@@ -42,9 +42,17 @@ public class EinkaufslisteController implements Initializable {
     public void add(KeyEvent event) {
         if(event.getCode() == KeyCode.ENTER) {
             if(!input.getText().isEmpty()) {
-                alleTasks.add(new Task(input.getText()));
-                updateOutput();
-                clearFields();
+                // Hinzufügen zu der Liste als Instanzvariable
+                // alleTasks.add(new Task(input.getText()));
+                try {
+                    repo.save(new Task(input.getText()));
+                    updateOutput();
+                    clearFields();
+                }
+                catch(SQLException e) {
+                    // TODO: Fehler in der GUI ausgeben
+                    System.out.println(e.getMessage());
+                }
             }
         }
     }
@@ -79,8 +87,15 @@ public class EinkaufslisteController implements Initializable {
     public void remove() {
         Task item = taskList.getSelectionModel().getSelectedItem();
         if(item != null) {
-            alleTasks.remove(item);
-            updateOutput();
+            //alleTasks.remove(item); // Entfernen aus der Liste als Instanzvariable
+            try {
+                repo.delete(item);
+                updateOutput();
+            }
+            catch(SQLException e) {
+                // TODO: Fehler in der GUI ausgeben
+                System.out.println(e.getMessage());
+            }
         }
     }
 
@@ -88,18 +103,34 @@ public class EinkaufslisteController implements Initializable {
         Task item = taskList.getSelectionModel().getSelectedItem();
         if(item != null) {
             item.toggleOpen();
-            updateOutput();
+            try {
+                repo.save(item);
+                updateOutput();
+            }
+            catch(SQLException e) {
+                // TODO: Fehler in der GUI ausgeben
+                System.out.println(e.getMessage());
+            }
         }
     }
 
     private void updateOutput() {
-        ObservableList<Task> tasks = FXCollections.observableList(alleTasks);
+        // Verwendet die List als Instanzvariable
+        // ObservableList<Task> tasks = FXCollections.observableList(alleTasks);
 
-        if(filter == null) {
-            taskList.setItems(tasks); // Alle Tasks anzeigen
+        try {
+            // Fragt die Daten aus der Datenbank ab
+            ObservableList<Task> tasks = FXCollections.observableList(repo.findAll());
+
+            if (filter == null) {
+                taskList.setItems(tasks); // Alle Tasks anzeigen
+            } else {
+                taskList.setItems(new FilteredList<>(tasks, filter)); // Elemente gefiltert anzeigen
+            }
         }
-        else {
-            taskList.setItems(new FilteredList<>(tasks, filter)); // Elemente gefiltert anzeigen
+        catch(SQLException e) {
+            // TODO: Fehler in der GUI ausgeben
+            System.out.println(e.getMessage());
         }
     }
 
@@ -118,6 +149,7 @@ public class EinkaufslisteController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
             repo = new TaskRepository();
+            updateOutput(); // Anzeige der Daten aus der DB
         }
         catch (SQLException e) {
             System.out.println("Fehler beim Verbinden mit der Datenbank!");

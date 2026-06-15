@@ -29,9 +29,9 @@ public class TaskRepository implements Repository<Task> {
     @Override
     public Task findById(int id) throws SQLException {
         try {
-            return find("SELECT * FROM " + TABLE + " WHERE id = " + id).getFirst();
+            return find("SELECT * FROM " + TABLE + " WHERE id = " + id).get(0);
         }
-        catch(NoSuchElementException e) {
+        catch(IndexOutOfBoundsException e) {
             return null;
         }
     }
