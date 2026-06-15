@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -12,11 +13,15 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 import java.io.IOException;
+import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.function.Predicate;
 
-public class EinkaufslisteController {
+// Das Interface Initializable bietet eine Methode die automatisch beim Start des Controllers aufgerufen wird
+public class EinkaufslisteController implements Initializable {
 
     // TODO: Filter einsetzen
     // TODO: Action für Filter-Buttos festlegen
@@ -32,11 +37,14 @@ public class EinkaufslisteController {
 
     private Predicate<Task> filter;
 
+    private TaskRepository repo;
+
     public void add(KeyEvent event) {
         if(event.getCode() == KeyCode.ENTER) {
             if(!input.getText().isEmpty()) {
                 alleTasks.add(new Task(input.getText()));
                 updateOutput();
+                clearFields();
             }
         }
     }
@@ -95,9 +103,25 @@ public class EinkaufslisteController {
         }
     }
 
+    private void clearFields() {
+        input.clear();
+    }
+
+
     public void switchToMain() throws IOException {
         App.setRoot("main-view");
         App.mainStage.setWidth(600);
         App.mainStage.setHeight(520);
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        try {
+            repo = new TaskRepository();
+        }
+        catch (SQLException e) {
+            System.out.println("Fehler beim Verbinden mit der Datenbank!");
+            e.printStackTrace();
+        }
     }
 }

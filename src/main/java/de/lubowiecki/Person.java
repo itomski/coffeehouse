@@ -1,7 +1,6 @@
 package de.lubowiecki;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 public class Person {
 
